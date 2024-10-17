@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malaysia Covid-19 Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('Background_Covid_White.jpeg');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 0px;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 2200px;
+        }
+
+        .left-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: transparent;
+            margin-left: -15%;
+        }
+
+        .right-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: rgba(211, 211, 211, 0.8); 
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .map-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        svg {
+            background-color: transparent;
+        }
+
+        .map,
+        .lollipop-chart,
+        .radar-chart,
+        .gdp-chart,
+        .diverging-chart,
+        .bar-chart {
+            margin: 20px;
+            background-color: transparent;
+        }
+
+        #controls {
+            margin-top: -2.10%;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-right: 0%;
+            align-items: center;
+        }
+
+        #play,
+        #restart {
+            background-color: #f0f0f0;
+            border: none;
+            padding: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        #play {
+            background-image: url('play_button_1.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            width: 40px;
+            height: 40px;
+        }
+
+        #restart {
+            background-image: url('Restart.png');
+            background-size: contain;
+            background-repeat: no-repeat;
+            width: 40px;
+            height: 40px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        #chartButton,
+        #analyticsButton {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: white;
+            padding: 10px;
+            border: 1px solid black;
+            border-radius: 3px;
+            pointer-events: none;
+            opacity: 0;
+            font-size: 14px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+            font-family: sans-serif;
+            max-width: 200px;
+            opacity: 0;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .tooltip strong {
+            font-weight: bold;
+            font-size: 16px;
+        }
+
+        .radarArea {
+            fill: lightcoral;
+            fill-opacity: 0.7;
+            stroke: lightcoral;
+            stroke-width: 2px;
+        }
+
+        .bar {
+            fill: lightcoral;
+        }
+
+        .content-section {
+            display: none;
+            background-color: transparent;
+        }
+
+        .content-section.active {
+            display: block;
+            background-color: transparent;
+        }
+
+        .line-area {
+            fill: steelblue;
+            fill-opacity: 0.5;
+            stroke: steelblue;
+            stroke-width: 2px;
+        }
+
+        .line {
+            fill: none;
+            stroke: red;
+            stroke-width: 2;
+        }
+
+        .area {
+            fill: red;
+            opacity: 0.5;
+        }
+
+        .dotted-line {
+            stroke: black;
+            stroke-width: 1;
+            stroke-dasharray: 3, 3;
+            opacity: 0;
+        }
+
+        .bar {
+            fill-opacity: 0.7;
+        }
+
+        .bar.death {
+            fill: rgb(255, 0, 0);
+        }
+
+        .bar.birth {
+            fill: rgb(56, 87, 200);
+        }
+
+        .axis text {
+            font-size: 14px;
+        }
+
+        .tooltip {
+            position: absolute;
+            text-align: center;
+            padding: 4px;
+            font: 12px sans-serif;
+            background: #f0f0f0;
+            border: 1px solid #aaa;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        .stats-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .card,
+        .card-death,
+        .card-confirmed,
+        .card-active,
+        .card-recovered {
+            width: 170px;
+            height: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .card-death,
+        .death {
+            background-color: #f44336;
+        }
+
+        .card-confirmed,
+        .confirmed {
+            background-color: #f0db17d3;
+        }
+
+        .card-active,
+        .active {
+            background-color: #2196f3;
+        }
+
+        .card-recovered,
+        .recovered {
+            background-color: #4caf50;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #map-controls {
+            display: flex;
+            gap: 10px;
+            margin-left: 40%;
+        }
+
+        .label {
+            font-size: 16px;
+        }
+        #zoomIn,
+        #zoomOut {
+            background-color: transparent;
+            border: none;
+            width: 25px;
+            height: 25px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            cursor: pointer;
+            margin-top: -23%;
+        }
+
+        #zoomIn {
+            background-image: url('add.png');
+            margin-left: 230px;
+        }
+
+        #zoomOut {
+            background-image: url('minus.png');
+        }
+
+        #chart-content,
+        .diverging-chart {
+            margin-top: 100px;
+        }
+
+        .slider {
+            -webkit-appearance: none;
+            width: 600px;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity .2s;
+            margin-left: 20px;
+        }
+
+        .slider:hover {
+            opacity: 1;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: red;
+            cursor: pointer;
+        }
+
+        .slider::-moz-range-thumb {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: red;
+            cursor: pointer;
+        }
+        #yearDisplay {
+            margin-left: 10px;
+            font-size: 1.2em;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>How Is Malaysia Coping with Covid-19 in Terms of Growth and Economy?</h1>
+    <div class="container">
+        <div class="left-section">
+            <div class="map-container">
+                <div class="stats-container">
+                    <div class="card card-death">
+                        <div class="deathData" id="death-number"></div>
+                        <div class="label">Total Death</div>
+                    </div>
+                    <div class="card card-confirmed">
+                        <div class="confirmedData" id="confirmed-number"></div>
+                        <div class="label">Total Confirmed</div>
+                    </div>
+                    <div class="card card-active">
+                        <div class="activeData" id="active-number"></div>
+                        <div class="label">Total Active</div>
+                    </div>
+                    <div class="card card-recovered">
+                        <div class="recoveredData" id="recovered-number"></div>
+                        <div class="label">Total Recovered</div>
+                    </div>
+                </div>
+                <svg class="map" width="1400" height="400">
+                    <text x="50%" y="50" text-anchor="middle" class="chart-title" font-weight="bold">COVID BUBBLE MAP</text>
+                </svg>
+                <div id="map-controls">
+                    <button id="zoomIn"></button>
+                    <button id="zoomOut"></button>
+                </div>
+            </div>
+            <div id="controls">
+                <button id="play"></button>
+                <input type="range" id="yearSlider" min="2020" max="2024" value="2020" step="1" class="slider">
+                <button id="restart"></button>
+                <span id="yearDisplay">2020</span>
+            </div>
+            <svg class="lollipop-chart" width="600" height="300">
+                <text x="50%" y="12" text-anchor="middle" class="chart-title" font-weight="bold">COVID DEATH</text>
+            </svg>
+        </div>
+
+        <div class="right-section">
+            <div class="controls">
+                <button id="chartButton">Economy</button>
+                <button id="analyticsButton">Growth</button>
+            </div>
+            <div id="chart" class="content-section active">
+                <div class="chart-container">
+                    <svg class="radar-chart" width="600" height="600">
+                        <text x="50%" y="80" text-anchor="middle" class="chart-title" font-weight="bold">PRODUCT PRICE INDEX</text>
+                    </svg>
+                    <svg class="gdp-chart" width="600" height="300">
+                        <text x="50%" y="20" text-anchor="middle" class="chart-title" font-weight="bold">MALAYSIA REAL GDP</text>
+                    </svg>
+                </div>
+            </div>
+            <div id="analytics" class="content-section">
+                <div style="text-align: center;">
+                    <div id="chart-content" class="bar-chart" style="width: 600px; height: 300px;">
+                        <h3 class="chart-title" style="text-align: center;" >MALAYSIA POPULATION</h3>
+                        <!-- Add your bar chart content here -->
+                    </div>
+                    <svg class="diverging-chart" width="600" height="300">
+                        <text x="50%" y="20" text-anchor="middle" class="chart-title" font-weight="bold">ANNUAL DEATHS AND BIRTHS</text>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tooltip"></div>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
